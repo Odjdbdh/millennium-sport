@@ -1,95 +1,34 @@
 # Millennium Sport
 
-وب‌سایت رسمی گروه تولیدی میلنیوم اسپرت؛ ساخته‌شده با Next.js/Vinext و آمادهٔ انتشار روی Cloudflare Workers.
+Persian RTL wholesale sportswear site for [millenniumsport.ir](https://millenniumsport.ir), built with Next.js/Vinext and deployed on Cloudflare Workers.
 
-## قابلیت‌های اصلی
+## Admin panel
 
-- فروشگاه و کاتالوگ عمدهٔ پوشاک ورزشی با طراحی کامل راست‌به‌چپ
-- صفحات محصولات، همکاری عمده، درخواست پیش‌فاکتور، درباره ما و تماس
-- تصاویر واقعی محصولات و آواتار ثابت مدل زن
-- نوار استوری در تمام صفحات با نمایش تمام‌صفحهٔ عکس و ویدیو
-- پنل مدیریت استوری در مسیر `/admin`
-- انقضای خودکار هر استوری دقیقاً ۲۴ ساعت پس از انتشار
-- پاک‌سازی ساعتی فایل‌ها و رکوردهای منقضی‌شده با Cloudflare Cron
+The private management panel is available at `/admin` and includes:
 
-## توسعه و بررسی محلی
+- product creation, editing, inventory state, pricing, colors, sizes, and galleries
+- wholesale inquiry pipeline and customer list
+- 24-hour image/video stories
+- R2-backed media library
+- dashboard statistics and mobile-first Persian UI
 
-نیازمندی: Node.js 22 یا جدیدتر.
+Products and inquiries are stored in Cloudflare D1. Uploaded images and story media are stored in Cloudflare R2. The public catalog reads from D1 and safely falls back to the bundled catalog until storage is ready.
+
+## Security setup
+
+Create a Cloudflare Worker secret named `ADMIN_TOKEN` with a unique value of at least 16 characters. Never commit this value to GitHub.
+
+The admin uses an HttpOnly, Secure, SameSite=Strict signed session cookie, same-origin mutation checks, constant-time password comparison, no-store/noindex headers, and temporary lockout after repeated failed attempts.
+
+D1 and R2 bindings are declared in `wrangler.jsonc` and can be provisioned automatically by Workers Builds.
+
+## Development
 
 ```bash
-npm ci
+npm install
 npm run dev
-```
-
-بررسی نهایی:
-
-```bash
 npm run lint
 npm test
-npm run deploy:dry
 ```
 
-## انتشار خودکار از GitHub روی Cloudflare
-
-در Cloudflare Workers Builds این تنظیمات را وارد کنید:
-
-- Production branch: `main`
-- Deploy command: `npm run deploy`
-- Node version: `22`
-
-هر Push روی شاخهٔ `main` نسخهٔ اصلی را Build و منتشر می‌کند. فایل `wrangler.jsonc` تنظیمات Worker، فایل‌های استاتیک و پاک‌سازی ساعتی را نگه می‌دارد.
-
-## بهینه‌سازی رسانه و سرعت بارگذاری
-
-- تصاویر ثابت سایت با ابعاد متناسب و فرمت WebP نگه‌داری می‌شوند.
-- تصاویر محصولات از قبل WebP و کم‌حجم هستند و فقط هنگام نزدیک‌شدن به محدودهٔ دید بارگذاری می‌شوند.
-- عکس استوری در مرورگر به حداکثر ۱۰۸۰×۱۹۲۰ و WebP با کیفیت ۸۲٪ تبدیل می‌شود؛ یک تصویر بندانگشتی ۱۶۰×۱۶۰ نیز برای نوار استوری ساخته می‌شود تا فایل کامل در صفحه بارگذاری نشود.
-- ویدیوی استوری تا زمان بازشدن آن بارگذاری نمی‌شود. برای بهترین نتیجه، ویدیوی MP4 با کدک H.264، ابعاد ۷۲۰×۱۲۸۰ و حجم کمتر از ۲۰ مگابایت استفاده شود.
-- فایل استوری از R2 با کش کوتاه و متناسب با زمان باقی‌مانده تا انقضای ۲۴ساعته ارائه می‌شود.
-
-## راه‌اندازی استوری ۲۴ساعته
-
-پیش از استفاده از پنل، در Cloudflare این منابع را ایجاد کنید:
-
-1. D1 database با نام `millennium-stories`
-2. R2 bucket با نام `millennium-story-media`
-3. Secret با نام `ADMIN_TOKEN` برای رمز ورود پنل
-
-سپس bindingهای زیر را با شناسهٔ واقعی D1 به `wrangler.jsonc` اضافه کنید:
-
-```jsonc
-"d1_databases": [
-  {
-    "binding": "STORIES_DB",
-    "database_name": "millennium-stories",
-    "database_id": "<D1_DATABASE_ID>",
-    "migrations_dir": "migrations"
-  }
-],
-"r2_buckets": [
-  {
-    "binding": "STORY_MEDIA",
-    "bucket_name": "millennium-story-media"
-  }
-]
-```
-
-ساخت جدول و ثبت رمز مدیریت:
-
-```bash
-npx wrangler d1 migrations apply STORIES_DB --remote
-npx wrangler secret put ADMIN_TOKEN
-```
-
-API هنگام نخستین اجرا نیز جدول را در صورت نبودن ایجاد می‌کند. فایل Migration برای مدیریت نسخه‌های بعدی دیتابیس نگه‌داری شده است.
-
-## مسیر فایل‌های مهم
-
-- محصولات و مشخصات: `app/data/products.ts`
-- تصاویر: `public/images/`
-- رابط استوری: `app/components/StoryBar.tsx`
-- پنل استوری: `app/admin/`
-- API استوری: `app/api/stories/` و `app/api/admin/`
-- دیتابیس: `migrations/0001_stories.sql`
-
-هیچ رمز، توکن یا شناسهٔ حساس نباید داخل GitHub Commit شود؛ Secretها فقط در Cloudflare نگه‌داری می‌شوند.
+Production builds use `npm run build`.
