@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import CatalogExplorer from "../components/CatalogExplorer";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
-import { products } from "../data/products";
+import { getCatalogProducts } from "../lib/catalog";
 
 export const metadata: Metadata = {
   title: "کاتالوگ عمده پوشاک ورزشی",
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/shop" },
 };
 
-export default function ShopPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ShopPage() {
+  const products = await getCatalogProducts();
   return (
     <div className="shop-page pro-page">
       <SiteHeader active="shop" />
@@ -29,4 +32,3 @@ export default function ShopPage() {
     </div>
   );
 }
-
