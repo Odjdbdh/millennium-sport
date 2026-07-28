@@ -3,6 +3,17 @@
   "name": "millennium-sport",
   "compatibility_date": "2026-07-22",
   "main": "./worker/index.ts",
+  "keep_vars": true,
+  "d1_databases": [
+    {
+      "binding": "STORIES_DB"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORY_MEDIA"
+    }
+  ],
   "assets": {
     "directory": "dist/client",
     "not_found_handling": "none",
