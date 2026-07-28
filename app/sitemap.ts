@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
-import { products } from "./data/products";
+import { getCatalogProducts } from "./lib/catalog";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getCatalogProducts();
   const baseUrl = "https://millenniumsport.ir";
   const pages = ["", "/shop", "/wholesale", "/about", "/contact", "/quote"];
   return [
@@ -9,4 +10,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...products.map((product) => ({ url: `${baseUrl}/products/${product.slug}`, changeFrequency: "weekly" as const, priority: 0.8 })),
   ];
 }
-
