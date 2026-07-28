@@ -14,7 +14,7 @@ const provinces = [
 
 export default function QuoteForm({ initialProduct = "" }: { initialProduct?: string }) {
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "copied" | "stored" | "error">("idle");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,9 +31,24 @@ export default function QuoteForm({ initialProduct = "" }: { initialProduct?: st
     ].join("\n");
 
     setMessage(requestText);
+    const inquiry = {
+      name: String(data.get("name") ?? ""),
+      business: String(data.get("business") ?? ""),
+      province: String(data.get("province") ?? ""),
+      city: String(data.get("city") ?? ""),
+      phone: String(data.get("phone") ?? ""),
+      product: String(data.get("product") ?? ""),
+      details: String(data.get("details") ?? ""),
+      website: String(data.get("website") ?? ""),
+    };
+    const stored = fetch("/api/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(inquiry),
+    }).then((response) => response.ok).catch(() => false);
     try {
       await navigator.clipboard.writeText(requestText);
-      setStatus("copied");
+      setStatus(await stored ? "stored" : "copied");
     } catch {
       setStatus("error");
     }
@@ -54,7 +69,7 @@ export default function QuoteForm({ initialProduct = "" }: { initialProduct?: st
         <div className="quote-form-heading">
           <span>کمتر از دو دقیقه</span>
           <h2>مشخصات درخواست همکاری</h2>
-          <p>این فرم اطلاعات را روی سایت ذخیره یا ارسال نمی‌کند؛ در پایان متن آماده می‌شود تا خودتان در تلگرام برای واحد فروش بفرستید.</p>
+          <p>درخواست برای پیگیری واحد فروش ثبت می‌شود و هم‌زمان متن آماده‌ای می‌سازد تا در تلگرام ارسال کنید.</p>
         </div>
 
         <div className="form-grid">
@@ -89,6 +104,10 @@ export default function QuoteForm({ initialProduct = "" }: { initialProduct?: st
             <span>تعداد تقریبی و توضیحات</span>
             <textarea name="details" rows={5} placeholder="تعداد تقریبی، سایزها، رنگ‌ها یا هر توضیحی که به استعلام دقیق‌تر کمک می‌کند…" />
           </label>
+          <label aria-hidden="true" style={{ position: "absolute", right: "-10000px" }}>
+            وب‌سایت
+            <input name="website" tabIndex={-1} autoComplete="off" />
+          </label>
         </div>
 
         <button className="quote-submit" type="submit">ساخت و کپی متن درخواست <Icon name="copy" /></button>
@@ -112,6 +131,7 @@ export default function QuoteForm({ initialProduct = "" }: { initialProduct?: st
             </div>
             <p className={`copy-status ${status}`} role="status">
               {status === "copied" && "متن کپی شد؛ حالا آن را در تلگرام جای‌گذاری و ارسال کنید."}
+              {status === "stored" && "درخواست ثبت و متن کپی شد؛ برای پاسخ سریع‌تر آن را در تلگرام هم ارسال کنید."}
               {status === "error" && "کپی خودکار در مرورگر شما ممکن نبود؛ متن بالا را دستی انتخاب و کپی کنید."}
             </p>
           </>
@@ -120,4 +140,3 @@ export default function QuoteForm({ initialProduct = "" }: { initialProduct?: st
     </div>
   );
 }
-
