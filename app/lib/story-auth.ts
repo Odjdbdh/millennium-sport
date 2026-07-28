@@ -1,4 +1,4 @@
-const SESSION_COOKIE = "millennium_story_admin";
+const SESSION_COOKIE = "millennium_admin_session";
 const SESSION_LIFETIME_SECONDS = 12 * 60 * 60;
 const encoder = new TextEncoder();
 
@@ -42,26 +42,38 @@ function readCookie(request: Request, name: string) {
   return null;
 }
 
+export function isStrongAdminToken(secret: string | undefined) {
+  return Boolean(secret && secret.length >= 16);
+}
+
 export async function hasAdminSession(request: Request, secret: string) {
   const value = readCookie(request, SESSION_COOKIE);
   if (!value) return false;
 
-  const [expiresRaw, signature] = value.split(".");
+  const [expiresRaw, nonce, signature] = value.split(".");
   const expires = Number(expiresRaw);
-  if (!expiresRaw || !signature || !Number.isSafeInteger(expires) || expires <= Date.now()) {
+  if (
+    !expiresRaw ||
+    !nonce ||
+    !signature ||
+    !Number.isSafeInteger(expires) ||
+    expires <= Date.now()
+  ) {
     return false;
   }
 
-  const expected = await sign(expiresRaw, secret);
+  const expected = await sign(`${expiresRaw}.${nonce}`, secret);
   return constantTimeEqual(signature, expected);
 }
 
 export async function createAdminSessionCookie(request: Request, secret: string) {
   const expires = Date.now() + SESSION_LIFETIME_SECONDS * 1000;
-  const signature = await sign(String(expires), secret);
+  const nonce = crypto.randomUUID().replaceAll("-", "");
+  const unsigned = `${expires}.${nonce}`;
+  const signature = await sign(unsigned, secret);
   const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
 
-  return `${SESSION_COOKIE}=${expires}.${signature}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_LIFETIME_SECONDS}${secure}`;
+  return `${SESSION_COOKIE}=${unsigned}.${signature}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_LIFETIME_SECONDS}${secure}`;
 }
 
 export function clearAdminSessionCookie(request: Request) {
@@ -73,4 +85,22 @@ export function isSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return true;
   return origin === new URL(request.url).origin;
+}
+
+export async function adminFingerprint(request: Request) {
+  const source = [
+    request.headers.get("cf-connecting-ip") ?? "unknown",
+    request.headers.get("user-agent") ?? "unknown",
+  ].join("|");
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(source));
+  return toBase64Url(new Uint8Array(digest));
+}
+
+export function adminNoStoreHeaders() {
+  return {
+    "Cache-Control": "no-store, max-age=0",
+    "X-Content-Type-Options": "nosniff",
+    "X-Robots-Tag": "noindex, nofollow, noarchive",
+    "Referrer-Policy": "same-origin",
+  };
 }
