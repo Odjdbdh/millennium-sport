@@ -14,7 +14,7 @@ export type Product = {
   sizes: string[];
   shortDescription: string;
   description: string;
-  status: "موجودی با استعلام";
+  status: "موجودی با استعلام" | "موجود" | "ناموجود" | "در حال تولید";
   gallery?: ProductGalleryImage[];
   sku?: string;
   material?: string;
