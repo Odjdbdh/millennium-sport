@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import StoryAdmin from "../components/StoryAdmin";
+import AdminDashboard from "../components/AdminDashboard";
 
 export const metadata: Metadata = {
-  title: "مدیریت استوری‌ها",
-  robots: { index: false, follow: false },
+  title: "پنل مدیریت",
+  robots: { index: false, follow: false, noarchive: true },
 };
 
-export default function StoryAdminPage() {
-  return <StoryAdmin />;
+export const dynamic = "force-dynamic";
+
+export default function AdminPage() {
+  return <AdminDashboard />;
 }
