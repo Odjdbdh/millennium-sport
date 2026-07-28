@@ -4,6 +4,7 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   STORIES_DB?: D1Database;
+  STORY_MEDIA?: R2Bucket;
   ADMIN_TOKEN?: string;
 }
 
