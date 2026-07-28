@@ -6,14 +6,17 @@ import ProductGallery from "../../components/ProductGallery";
 import SiteFooter from "../../components/SiteFooter";
 import SiteHeader from "../../components/SiteHeader";
 import { products } from "../../data/products";
+import { getCatalogProduct } from "../../lib/catalog";
 
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
 }
 
+export const dynamicParams = true;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = await getCatalogProduct(slug);
   if (!product) return {};
   return {
     title: product.name,
@@ -25,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = await getCatalogProduct(slug);
   if (!product) notFound();
 
   const productData = {
