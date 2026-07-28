@@ -5,7 +5,8 @@ import Icon from "./components/Icon";
 import SiteFooter from "./components/SiteFooter";
 import SiteHeader from "./components/SiteHeader";
 import StoreMap from "./components/StoreMap";
-import { featuredProduct } from "./data/products";
+import { featuredProduct as fallbackFeaturedProduct } from "./data/products";
+import { getCatalogProducts } from "./lib/catalog";
 
 export const metadata: Metadata = {
   title: "تولید و پخش عمده پوشاک ورزشی",
@@ -27,7 +28,8 @@ const steps = [
   ["۰۴", "پیش‌فاکتور و ارسال", "پس از تأیید نهایی، جزئیات پیش‌فاکتور و نحوه ارسال سفارش هماهنگ می‌شود."],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [featuredProduct = fallbackFeaturedProduct] = await getCatalogProducts();
   return (
     <div className="site-shell">
       <SiteHeader active="home" />
