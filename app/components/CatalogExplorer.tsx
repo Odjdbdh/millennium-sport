@@ -20,7 +20,7 @@ const normalizeSearch = (value: string) =>
     .replace(/[يى]/g, "ی")
     .replace(/ك/g, "ک")
     .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
-    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
 
 export default function CatalogExplorer({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
