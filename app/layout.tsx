@@ -27,7 +27,6 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", images: ["/images/millennium-logo-social.webp"] },
   icons: { icon: "/images/millennium-logo-icon.png", apple: "/images/millennium-logo-icon.png" },
-  other: { "codex-preview": "development" },
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff", colorScheme: "light" };
