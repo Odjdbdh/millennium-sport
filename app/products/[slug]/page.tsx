@@ -20,13 +20,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) return {};
 
   const gallery = product.gallery ?? [{ src: product.image, alt: product.imageAlt, label: "تصویر محصول" }];
+  const title = `${product.name}${product.sku ? ` | کد ${product.sku}` : ""}`;
   return {
-    title: `${product.name}${product.sku ? ` | کد ${product.sku}` : ""}`,
+    title,
     description: `${product.shortDescription} مشاهده رنگ‌بندی و جزئیات محصول و استعلام قیمت همکاری روز از میلنیوم اسپرت.`,
     alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
       type: "website",
-      title: `${product.name}${product.sku ? ` | کد ${product.sku}` : ""}`,
+      title,
       description: product.shortDescription,
       url: `/products/${product.slug}`,
       images: gallery.slice(0, 6).map((image) => ({
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
     twitter: {
       card: "summary_large_image",
-      title: product.name,
+      title,
       description: product.shortDescription,
       images: [gallery[0].src],
     },
@@ -91,7 +92,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
         <section className="product-buying-guide"><div><span>برای استعلام سریع‌تر</span><h2>نام محصول، تعداد تقریبی و شهر خود را ارسال کنید.</h2></div><Link href="/wholesale#process">مراحل کامل خرید عمده <Icon name="arrow" /></Link></section>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productData).replace(/</g, "\\u003c") }} />
       </main>
       <SiteFooter />
     </div>
