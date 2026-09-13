@@ -56,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="fa" dir="rtl">
       <body>
         {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData).replace(/</g, "\\u003c") }} />
       </body>
     </html>
   );
