@@ -26,6 +26,13 @@ export default function CatalogExplorer({ products }: { products: Product[] }) {
     });
   }, [category, products, query]);
 
+  const hasFilters = query.trim().length > 0 || category !== "all";
+
+  const resetFilters = () => {
+    setQuery("");
+    setCategory("all");
+  };
+
   return (
     <section className="catalog-explorer" id="catalog" aria-labelledby="catalog-title">
       <div className="catalog-tools">
@@ -37,8 +44,14 @@ export default function CatalogExplorer({ products }: { products: Product[] }) {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="جست‌وجوی نام یا نوع محصول…"
+            placeholder="جست‌وجوی نام، کد یا نوع محصول…"
+            autoComplete="off"
           />
+          {query ? (
+            <button type="button" className="catalog-search-clear" onClick={() => setQuery("")} aria-label="پاک کردن جست‌وجو">
+              ×
+            </button>
+          ) : null}
         </div>
         <div className="catalog-filters" aria-label="فیلتر دسته‌بندی">
           {categories.map((item) => (
@@ -56,16 +69,21 @@ export default function CatalogExplorer({ products }: { products: Product[] }) {
       </div>
 
       <div className="catalog-result-meta">
-        <h2 id="catalog-title">محصولات ثبت‌شده در کاتالوگ</h2>
-        <span>{filteredProducts.length.toLocaleString("fa-IR")} محصول</span>
+        <div>
+          <h2 id="catalog-title">محصولات ثبت‌شده در کاتالوگ</h2>
+          <p aria-live="polite">نمایش {filteredProducts.length.toLocaleString("fa-IR")} محصول از {products.length.toLocaleString("fa-IR")}</p>
+        </div>
+        {hasFilters ? (
+          <button type="button" className="catalog-reset" onClick={resetFilters}>حذف فیلترها</button>
+        ) : null}
       </div>
 
       {filteredProducts.length > 0 ? (
         <div className="catalog-product-grid">
           {filteredProducts.map((product) => (
             <article className="catalog-product" key={product.slug}>
-              <Link className="catalog-product-image" href={`/products/${product.slug}`}>
-                <Image src={product.image} alt={product.imageAlt} width={720} height={960} sizes="(max-width: 720px) 100vw, 420px" unoptimized />
+              <Link className="catalog-product-image" href={`/products/${product.slug}`} aria-label={`مشاهده ${product.name}`}>
+                <Image src={product.image} alt={product.imageAlt} width={720} height={960} sizes="(max-width: 720px) 100vw, (max-width: 1100px) 50vw, 420px" unoptimized />
                 <span>{product.status}</span>
               </Link>
               <div className="catalog-product-body">
@@ -87,9 +105,12 @@ export default function CatalogExplorer({ products }: { products: Product[] }) {
       ) : (
         <div className="catalog-empty" role="status">
           <Icon name="shirt" size={30} />
-          <strong>محصول ثبت‌شده‌ای با این فیلتر پیدا نشد.</strong>
-          <p>برای دریافت مدل‌ها و موجودی‌های روز، درخواست کاتالوگ همکاری ثبت کنید.</p>
-          <Link href="/quote">درخواست کاتالوگ روز</Link>
+          <strong>محصولی با این جست‌وجو یا فیلتر پیدا نشد.</strong>
+          <p>عبارت جست‌وجو را کوتاه‌تر کنید یا فیلترها را پاک کنید.</p>
+          <div>
+            <button type="button" onClick={resetFilters}>نمایش همه محصولات</button>
+            <Link href="/quote">درخواست کاتالوگ روز</Link>
+          </div>
         </div>
       )}
 
