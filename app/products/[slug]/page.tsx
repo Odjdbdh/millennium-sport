@@ -18,11 +18,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const product = await getCatalogProduct(slug);
   if (!product) return {};
+
+  const gallery = product.gallery ?? [{ src: product.image, alt: product.imageAlt, label: "تصویر محصول" }];
   return {
-    title: product.name,
-    description: `${product.shortDescription} مشاهده جزئیات و درخواست قیمت همکاری روز از میلنیوم اسپرت.`,
+    title: `${product.name}${product.sku ? ` | کد ${product.sku}` : ""}`,
+    description: `${product.shortDescription} مشاهده رنگ‌بندی و جزئیات محصول و استعلام قیمت همکاری روز از میلنیوم اسپرت.`,
     alternates: { canonical: `/products/${product.slug}` },
-    openGraph: { images: [{ url: product.image, width: 960, height: 1280, alt: product.imageAlt }] },
+    openGraph: {
+      type: "website",
+      title: `${product.name}${product.sku ? ` | کد ${product.sku}` : ""}`,
+      description: product.shortDescription,
+      url: `/products/${product.slug}`,
+      images: gallery.slice(0, 6).map((image) => ({
+        url: image.src,
+        width: 900,
+        height: 1350,
+        alt: image.alt,
+      })),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.shortDescription,
+      images: [gallery[0].src],
+    },
   };
 }
 
@@ -31,11 +50,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getCatalogProduct(slug);
   if (!product) notFound();
 
+  const gallery = product.gallery ?? [{ src: product.image, alt: product.imageAlt, label: "تصویر محصول" }];
   const productData = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: (product.gallery ?? [{ src: product.image }]).map((image) => `https://millenniumsport.ir${image.src}`),
+    image: gallery.map((image) => `https://millenniumsport.ir${image.src}`),
     description: product.description,
     brand: { "@type": "Brand", name: "میلنیوم اسپرت" },
     category: `پوشاک ورزشی ${product.category}`,
@@ -43,8 +63,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ...(product.material ? { material: product.material } : {}),
     ...(product.colors ? { color: product.colors.join("، ") } : {}),
   };
-
-  const gallery = product.gallery ?? [{ src: product.image, alt: product.imageAlt, label: "تصویر محصول" }];
 
   return (
     <div className="pro-page product-page">
