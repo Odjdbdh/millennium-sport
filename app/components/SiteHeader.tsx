@@ -13,6 +13,8 @@ const navigation: { href: string; label: string; key: ActivePage }[] = [
   { href: "/contact", label: "تماس با ما", key: "contact" },
 ];
 
+const telegramUrl = "https://t.me/Millenniumsport";
+
 export default function SiteHeader({ active }: { active: ActivePage }) {
   return (
     <>
@@ -43,7 +45,7 @@ export default function SiteHeader({ active }: { active: ActivePage }) {
           </nav>
 
           <div className="header-actions">
-            <Link className="wholesale-header-cta" href="/quote">درخواست پیش‌فاکتور</Link>
+            <a className="wholesale-header-cta" href={telegramUrl} target="_blank" rel="noreferrer">گفت‌وگو در تلگرام <Icon name="send" /></a>
             <details className="mobile-menu">
               <summary aria-label="باز کردن منوی سایت"><Icon name="menu" /></summary>
               <nav aria-label="منوی موبایل">
@@ -53,6 +55,7 @@ export default function SiteHeader({ active }: { active: ActivePage }) {
                   </Link>
                 ))}
                 <Link className="mobile-quote" href="/quote">درخواست پیش‌فاکتور</Link>
+                <a className="mobile-telegram" href={telegramUrl} target="_blank" rel="noreferrer">گفت‌وگو در تلگرام</a>
               </nav>
             </details>
           </div>
