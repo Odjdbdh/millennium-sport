@@ -13,15 +13,26 @@ const categories = [
   { key: "sets", label: "ست ورزشی" },
 ] as const;
 
+const normalizeSearch = (value: string) =>
+  value
+    .trim()
+    .toLocaleLowerCase("fa")
+    .replace(/[يى]/g, "ی")
+    .replace(/ك/g, "ک")
+    .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+
 export default function CatalogExplorer({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]["key"]>("all");
 
   const filteredProducts = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("fa");
+    const normalizedQuery = normalizeSearch(query);
     return products.filter((product) => {
       const matchesCategory = category === "all" || product.categoryKey === category;
-      const haystack = `${product.name} ${product.category} ${product.shortDescription} ${product.sku ?? ""} ${product.material ?? ""} ${(product.colors ?? []).join(" ")}`.toLocaleLowerCase("fa");
+      const haystack = normalizeSearch(
+        `${product.name} ${product.category} ${product.shortDescription} ${product.sku ?? ""} ${product.material ?? ""} ${(product.colors ?? []).join(" ")}`,
+      );
       return matchesCategory && (!normalizedQuery || haystack.includes(normalizedQuery));
     });
   }, [category, products, query]);
