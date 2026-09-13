@@ -13,6 +13,8 @@ const categories = [
   { key: "sets", label: "ست ورزشی" },
 ] as const;
 
+type CategoryKey = (typeof categories)[number]["key"];
+
 const normalizeSearch = (value: string) =>
   value
     .trim()
@@ -22,9 +24,15 @@ const normalizeSearch = (value: string) =>
     .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
     .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
 
-export default function CatalogExplorer({ products }: { products: Product[] }) {
+export default function CatalogExplorer({
+  products,
+  initialCategory = "all",
+}: {
+  products: Product[];
+  initialCategory?: CategoryKey;
+}) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<(typeof categories)[number]["key"]>("all");
+  const [category, setCategory] = useState<CategoryKey>(initialCategory);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = normalizeSearch(query);
