@@ -4,6 +4,7 @@ import "./globals.css";
 import "./light-theme.css";
 import "./pro-site.css";
 import "./stories.css";
+import "./blog/blog.css";
 
 const siteUrl = "https://millenniumsport.ir";
 
