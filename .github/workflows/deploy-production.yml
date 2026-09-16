@@ -44,12 +44,82 @@ jobs:
       - name: Build production artifact
         run: npm run build
 
+      - name: Bind existing Cloudflare resources
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+
+          db_name="millennium-sport-stories-db"
+          bucket_name="millennium-sport-story-media"
+
+          db_json=$(curl -fsS \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?name=${db_name}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json")
+          db_id=$(printf '%s' "$db_json" | jq -r '.result[0].uuid // empty')
+          test -n "$db_id" || { echo "Existing D1 database was not found: $db_name"; exit 1; }
+
+          bucket_json=$(curl -fsS \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets?name=${bucket_name}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json")
+          bucket_found=$(printf '%s' "$bucket_json" | jq -r --arg name "$bucket_name" '[.result.buckets[]? | select(.name == $name)] | length')
+          test "$bucket_found" = "1" || { echo "Existing R2 bucket was not found: $bucket_name"; exit 1; }
+
+          export DB_ID="$db_id" DB_NAME="$db_name" BUCKET_NAME="$bucket_name"
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = "dist/server/wrangler.json";
+          const config = JSON.parse(fs.readFileSync(path, "utf8"));
+          const { DB_ID, DB_NAME, BUCKET_NAME } = process.env;
+          let d1Bound = false;
+          let r2Bound = false;
+
+          function walk(value) {
+            if (!value || typeof value !== "object") return;
+            if (Array.isArray(value)) {
+              for (const item of value) walk(item);
+              return;
+            }
+            if (Array.isArray(value.d1_databases)) {
+              for (const binding of value.d1_databases) {
+                if (binding?.binding === "STORIES_DB") {
+                  binding.database_name = DB_NAME;
+                  binding.database_id = DB_ID;
+                  d1Bound = true;
+                }
+              }
+            }
+            if (Array.isArray(value.r2_buckets)) {
+              for (const binding of value.r2_buckets) {
+                if (binding?.binding === "STORY_MEDIA") {
+                  binding.bucket_name = BUCKET_NAME;
+                  r2Bound = true;
+                }
+              }
+            }
+            for (const child of Object.values(value)) walk(child);
+          }
+
+          walk(config);
+          if (!d1Bound || !r2Bound) {
+            throw new Error(`Expected bindings missing from generated Wrangler config (D1=${d1Bound}, R2=${r2Bound})`);
+          }
+          fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+
+          echo "Bound existing Cloudflare D1/R2 resources without creating new ones."
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.92.0"
+          command: deploy --experimental-provision=false
 
       - name: Verify public blog route
         shell: bash
