@@ -1,0 +1,68 @@
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows: [Quality]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Millennium Sport Worker
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout verified commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - name: Install dependencies
+        run: scripts/sites-env.sh -- npm ci
+
+      - name: Build production artifact
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.92.0"
+
+      - name: Verify public blog route
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            status=$(curl -L -sS -o /tmp/blog.html -w '%{http_code}' https://millenniumsport.ir/blog || true)
+            if [ "$status" = "200" ] && grep -q 'مجله میلنیوم اسپرت' /tmp/blog.html; then
+              echo "Production blog route is live."
+              exit 0
+            fi
+            echo "Blog route not ready yet (attempt $attempt/12, HTTP $status)."
+            sleep 10
+          done
+          echo "Production blog route did not become healthy in time."
+          exit 1
