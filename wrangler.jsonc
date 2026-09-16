@@ -6,12 +6,14 @@
   "keep_vars": true,
   "d1_databases": [
     {
-      "binding": "STORIES_DB"
+      "binding": "STORIES_DB",
+      "database_name": "millennium-sport-stories-db"
     }
   ],
   "r2_buckets": [
     {
-      "binding": "STORY_MEDIA"
+      "binding": "STORY_MEDIA",
+      "bucket_name": "millennium-sport-story-media"
     }
   ],
   "assets": {
