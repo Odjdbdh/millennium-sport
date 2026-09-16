@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Icon from "../../components/Icon";
 import ProductGallery from "../../components/ProductGallery";
+import ProductSeoLinks from "../../components/ProductSeoLinks";
 import SiteFooter from "../../components/SiteFooter";
 import SiteHeader from "../../components/SiteHeader";
 import { products } from "../../data/products";
@@ -25,24 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description: `${product.shortDescription} مشاهده رنگ‌بندی و جزئیات محصول و استعلام قیمت همکاری روز از میلنیوم اسپرت.`,
     alternates: { canonical: `/products/${product.slug}` },
-    openGraph: {
-      type: "website",
-      title,
-      description: product.shortDescription,
-      url: `/products/${product.slug}`,
-      images: gallery.slice(0, 6).map((image) => ({
-        url: image.src,
-        width: 900,
-        height: 1350,
-        alt: image.alt,
-      })),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: product.shortDescription,
-      images: [gallery[0].src],
-    },
+    openGraph: { type: "website", title, description: product.shortDescription, url: `/products/${product.slug}`, images: gallery.slice(0, 6).map((image) => ({ url: image.src, width: 900, height: 1350, alt: image.alt })) },
+    twitter: { card: "summary_large_image", title, description: product.shortDescription, images: [gallery[0].src] },
   };
 }
 
@@ -52,10 +37,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const gallery = product.gallery ?? [{ src: product.image, alt: product.imageAlt, label: "تصویر محصول" }];
+  const productUrl = `https://millenniumsport.ir/products/${product.slug}`;
   const productData = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${productUrl}#product`,
     name: product.name,
+    url: productUrl,
     image: gallery.map((image) => `https://millenniumsport.ir${image.src}`),
     description: product.description,
     brand: { "@type": "Brand", name: "میلنیوم اسپرت" },
@@ -91,6 +79,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <div className="product-honesty-note"><Icon name="check" /><p>برای جلوگیری از اطلاعات قدیمی، تعداد، رنگ‌بندی و قیمت قطعی پیش از سفارش توسط واحد فروش اعلام می‌شود.</p></div>
           </div>
         </section>
+        <ProductSeoLinks category={product.category} material={product.material} />
         <section className="product-buying-guide"><div><span>برای استعلام سریع‌تر</span><h2>نام محصول، تعداد تقریبی و شهر خود را ارسال کنید.</h2></div><Link href="/wholesale#process">مراحل کامل خرید عمده <Icon name="arrow" /></Link></section>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productData).replace(/</g, "\\u003c") }} />
       </main>
