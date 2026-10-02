@@ -188,6 +188,34 @@ export const products: Product[] = [
     phoneLabel: "۰۹۱۲۰۹۳۵۵۳۴",
     phoneHref: "tel:+989120935534",
   },
+  {
+    slug: "mesh-sports-bra-64",
+    name: "نیم‌تنه توری",
+    category: "زنانه",
+    categoryKey: "women",
+    image: "/images/products/64/mint.webp",
+    imageAlt: "نیم‌تنه توری زنانه سبزآبی کد ۶۴ روی مدل",
+    gallery: [
+      { src: "/images/products/64/mint.webp", alt: "نیم‌تنه توری زنانه سبزآبی کد ۶۴ روی مدل", label: "سبزآبی" },
+      { src: "/images/products/64/gray.webp", alt: "نیم‌تنه توری زنانه طوسی کد ۶۴ روی مدل", label: "طوسی" },
+      { src: "/images/products/64/black.webp", alt: "نیم‌تنه توری زنانه مشکی کد ۶۴ روی مدل", label: "مشکی" },
+      { src: "/images/products/64/back.webp", alt: "نمای پشت نیم‌تنه توری زنانه کد ۶۴", label: "نمای پشت" },
+    ],
+    sku: "64",
+    material: "فلامنت",
+    colors: ["سبزآبی", "طوسی", "مشکی"],
+    sizes: ["فری‌سایز"],
+    price: "۳۷۰ هزار تومان",
+    pack: "جین ۲۴، ۱۲ و ۶ عددی",
+    quality: "A+++++",
+    shortDescription: "نیم‌تنه ورزشی زنانه توری کد ۶۴ از جنس فلامنت، فری‌سایز و مناسب خرید عمده.",
+    description:
+      "نیم‌تنه توری زنانه کد ۶۴، مدل اقتصادی و مناسب استفاده ورزشی، تولیدشده از جنس فلامنت و ارائه‌شده در سایز فری‌سایز. رنگ‌بندی این محصول مطابق تصاویر گالری شامل سبزآبی، طوسی و مشکی است. این مدل با کیفیت A+++++ عرضه می‌شود و برای خرید عمده در جین‌های ۲۴، ۱۲ و ۶ عددی ارائه شده است. موجودی و ترکیب دقیق رنگ‌ها پیش از ثبت سفارش توسط واحد فروش تأیید می‌شود.",
+    status: "موجودی با استعلام",
+    salesTelegram: "https://t.me/millennium_sport",
+    phoneLabel: "۰۹۱۲۰۹۳۵۵۳۴",
+    phoneHref: "tel:+989120935534",
+  },
 ];
 
 export const featuredProduct = products[0];
