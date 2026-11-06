@@ -7,7 +7,8 @@
   "d1_databases": [
     {
       "binding": "STORIES_DB",
-      "database_name": "millennium-sport-stories-db"
+      "database_name": "millennium-sport-stories-db",
+      "database_id": "480933fb-4c27-465a-9ff8-bd53475165ed"
     }
   ],
   "r2_buckets": [
@@ -20,5 +21,6 @@
     "directory": "dist/client",
     "not_found_handling": "none",
     "binding": "ASSETS"
-  }
+  },
+  "secrets": ["ADMIN_TOKEN"]
 }
