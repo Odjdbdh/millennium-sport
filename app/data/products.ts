@@ -200,6 +200,7 @@ export const products: Product[] = [
       { src: "/images/products/64/gray.webp", alt: "نیم‌تنه توری زنانه طوسی کد ۶۴ روی مدل", label: "طوسی" },
       { src: "/images/products/64/black.webp", alt: "نیم‌تنه توری زنانه مشکی کد ۶۴ روی مدل", label: "مشکی" },
       { src: "/images/products/64/back.webp", alt: "نمای پشت نیم‌تنه توری زنانه کد ۶۴", label: "نمای پشت" },
+      { src: "/images/products/64/color-set.webp", alt: "نمای چیدمان رنگ‌بندی نیم‌تنه توری زنانه کد ۶۴", label: "نمای چیدمان" },
     ],
     sku: "64",
     material: "فلامنت",

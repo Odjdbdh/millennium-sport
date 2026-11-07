@@ -22,5 +22,7 @@
     "not_found_handling": "none",
     "binding": "ASSETS"
   },
-  "secrets": ["ADMIN_TOKEN"]
+  "secrets": {
+    "required": ["ADMIN_TOKEN"]
+  }
 }
